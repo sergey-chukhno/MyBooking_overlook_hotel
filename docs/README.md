@@ -8,6 +8,7 @@ Welcome to the technical documentation repository for the **MyBooking Platform**
 docs/
 ├── README.md                                  # Documentation overview and guidelines
 ├── architecture/                              # High-level architecture specifications
+│   ├── high-level-architecture-baseline-to-target.md # High-level architecture: v1 monolith to target enterprise platform
 │   ├── system-context.md                      # C4 System Context & Container diagrams
 │   ├── bounded-contexts.md                    # DDD context maps and domain boundaries
 │   ├── service-catalog.md                     # The Authoritative 13-Microservice Catalogue
