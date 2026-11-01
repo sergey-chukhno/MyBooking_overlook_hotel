@@ -190,6 +190,7 @@ The transformation is structured across **15 distinct phases** to ensure continu
 │ • Phase 01: Repository Consolidation & Test Harness Repair (COMPLETED)      │
 │ • Phase 02: Zero-Trust Security & UserPrincipal Identity (CURRENT)          │
 │ • Phase 03: Domain Refactoring & Reservation Core Fixes                     │
+│ • Milestone IdP: Keycloak Identity Provider Adoption & Next.js BFF          │
 │ • Phase 04: Modular Monolith Bounded Contexts & Schema Isolation            │
 │ • Phase 05: Transactional Outbox & In-Memory Domain Events                  │
 └──────────────────────────────────────┬──────────────────────────────────────┘
@@ -199,7 +200,7 @@ The transformation is structured across **15 distinct phases** to ensure continu
 │ HIGH-PERFORMANCE POLYGLOT ENGINES (Phases 06 - 08)                          │
 │ • Phase 06: C++20 Dynamic Pricing Engine & gRPC Interface                   │
 │ • Phase 07: Go Availability Search & Redis Read Model                       │
-│ • Phase 08: Identity Microservice Extraction & OAuth2/OIDC                  │
+│ • Phase 08: Identity Domain Service Extraction & SPIFFE/SPIRE Workload mTLS │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
                                        ▼

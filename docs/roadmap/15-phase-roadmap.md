@@ -10,11 +10,12 @@ This document serves as the authoritative architectural baseline and Trello back
 PHASE 01: Repository Consolidation & Test Harness Repair
 PHASE 02: Zero-Trust Security & Authentication Hardening
 PHASE 03: Domain Refactoring & Reservation Core Fixes
+MILESTONE IdP: Keycloak Identity Provider Adoption & Next.js BFF Architecture
 PHASE 04: Modular Monolith Bounded Contexts & PostgreSQL Schema Isolation
 PHASE 05: Transactional Outbox & In-Memory Domain Events
 PHASE 06: C++20 Dynamic Pricing & Yield Engine Integration (gRPC)
 PHASE 07: Go Availability Search & Edge API Gateway (Go + Redis)
-PHASE 08: Identity Microservice Extraction & OIDC Security (Java)
+PHASE 08: Identity Domain Service Extraction & SPIFFE/SPIRE Workload Identity (Java)
 PHASE 09: Distributed Event Streaming & Saga Workflows (Kafka, Payment & Notification Svcs)
 PHASE 10: Database-per-Service Migration & Analytics Service in Go (ClickHouse + Kafka)
 PHASE 11: AI Agent Platform & Deterministic Policy Guard Layer
@@ -46,11 +47,17 @@ PHASE 15: Kubernetes DevSecOps Deployment & Production Hardening
 * **Deliverables**: Interval overlap tests passing, back-to-back booking support.
 * **Dependencies**: Phase 02.
 
-### PHASE 04: Modular Monolith Bounded Contexts & PostgreSQL Schema Isolation
-* **Objective**: Separate the monolithic PostgreSQL schema into logical schemas (`auth`, `inventory`, `booking`, `loyalty`, `operations`) via Flyway migrations.
-* **Scope**: Flyway DDL scripts (`V9__*`), package-private encapsulation, eliminate cross-domain SQL joins.
-* **Deliverables**: Isolated schemas, domain aggregate models, ADR-0005.
+### MILESTONE IdP: Keycloak Identity Provider Adoption & Next.js BFF Architecture
+* **Objective**: Adopt Keycloak as centralized OAuth2/OIDC authority, eliminate browser token storage via Next.js BFF, migrate user credentials with forced password reset, and enable asymmetric JWKS token verification.
+* **Scope**: Docker Compose Keycloak deployment, realm-as-code configuration (`mybooking-platform`), user account migration preserving `app_user.id`, Next.js BFF server routes with `HttpOnly` session cookies, Spring Security Resource Server JWKS integration, positive/negative integration tests.
+* **Deliverables**: Self-hosted Keycloak service, asymmetric RS256/ES256 verification, zero `localStorage` tokens, ADR-0016.
 * **Dependencies**: Phase 03.
+
+### PHASE 04: Modular Monolith Bounded Contexts & PostgreSQL Schema Isolation
+* **Objective**: Separate the monolithic PostgreSQL schema into logical schemas (`auth`, `inventory`, `booking`, `loyalty`, `operations`) via Flyway migrations, reflecting the new externalized credential model.
+* **Scope**: Flyway DDL scripts (`V9__*`), package-private encapsulation, eliminate cross-domain SQL joins, update Merise documentation (MCD, MLD, MPD in `modelisation/`).
+* **Deliverables**: Isolated schemas, domain aggregate models, ADR-0005, ADR-0017.
+* **Dependencies**: Milestone IdP.
 
 ### PHASE 05: Transactional Outbox & In-Memory Domain Events
 * **Objective**: Decouple state mutations from side-effects using the Transactional Outbox pattern and Spring Application Events.
@@ -70,10 +77,10 @@ PHASE 15: Kubernetes DevSecOps Deployment & Production Hardening
 * **Deliverables**: Gateway rate-limiter, 5,000 req/sec search throughput, ADR-0008.
 * **Dependencies**: Phase 06.
 
-### PHASE 08: Identity Microservice Extraction & OIDC Security
-* **Objective**: Extract `identity-service` as an independent OAuth2 / OpenID Connect service with SPIFFE/SPIRE service identities.
-* **Scope**: Microservice #2 (`identity-service`), token issuance decoupling.
-* **Deliverables**: Standalone OIDC provider, mTLS service identity configuration.
+### PHASE 08: Identity Domain Service Extraction & SPIFFE/SPIRE Workload Identity
+* **Objective**: Extract `identity-service` as an autonomous domain service managing user profiles, hotel assignments, and authorization attributes, deploying SPIFFE/SPIRE service identities for inter-service mTLS.
+* **Scope**: Microservice #2 (`identity-service`), profile management, tenant authorization attribute resolver, SPIFFE/SPIRE mTLS configuration.
+* **Deliverables**: Autonomous identity domain service, SPIFFE workload attestation, inter-service mTLS contracts.
 * **Dependencies**: Phase 07.
 
 ### PHASE 09: Distributed Event Streaming & Saga Workflows
