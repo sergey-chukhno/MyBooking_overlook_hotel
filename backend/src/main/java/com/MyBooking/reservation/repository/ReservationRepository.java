@@ -17,9 +17,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
+    @EntityGraph(attributePaths = {"client", "room"})
+    Optional<Reservation> findByPublicId(UUID publicId);
+
+    @EntityGraph(attributePaths = {"client", "room"})
+    Optional<Reservation> findByPublicIdAndClientId(UUID publicId, Long clientId);
+
+    boolean existsByPublicId(UUID publicId);
 
     @Override
     @EntityGraph(attributePaths = {"client", "room"})

@@ -1,6 +1,8 @@
 package com.MyBooking.event.domain;
 
 import com.MyBooking.auth.domain.User;
+import com.MyBooking.common.domain.PublicIdEntityListener;
+import com.MyBooking.common.domain.PublicIdentifiable;
 import com.MyBooking.reservation.domain.Reservation;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -9,14 +11,19 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "event_booking")
-public class EventBooking {
+@EntityListeners(PublicIdEntityListener.class)
+public class EventBooking implements PublicIdentifiable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "public_id", columnDefinition = "uuid", nullable = false, unique = true, updatable = false)
+    private UUID publicId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
@@ -85,6 +92,12 @@ public class EventBooking {
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    @Override
+    public UUID getPublicId() { return publicId; }
+
+    @Override
+    public void setPublicId(UUID publicId) { this.publicId = publicId; }
     
     public Event getEvent() { return event; }
     public void setEvent(Event event) { this.event = event; }

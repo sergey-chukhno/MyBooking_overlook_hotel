@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository interface for EventBooking entity operations.
@@ -26,6 +27,14 @@ import java.util.Optional;
  */
 @Repository
 public interface EventBookingRepository extends JpaRepository<EventBooking, Long> {
+
+    @EntityGraph(attributePaths = {"event", "client", "reservation"})
+    Optional<EventBooking> findByPublicId(UUID publicId);
+
+    @EntityGraph(attributePaths = {"event", "client", "reservation"})
+    Optional<EventBooking> findByPublicIdAndClientId(UUID publicId, Long clientId);
+
+    boolean existsByPublicId(UUID publicId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT eb FROM EventBooking eb WHERE eb.id = :id")

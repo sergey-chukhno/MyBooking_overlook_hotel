@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository interface for Event entity operations.
@@ -25,6 +26,11 @@ import java.util.Optional;
  */
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
+
+    @EntityGraph(attributePaths = {"installation"})
+    Optional<Event> findByPublicId(UUID publicId);
+
+    boolean existsByPublicId(UUID publicId);
 
     // ==================== CONCURRENCY LOCKING METHODS ====================
 

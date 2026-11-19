@@ -1,18 +1,25 @@
 package com.MyBooking.room.domain;
 
+import com.MyBooking.common.domain.PublicIdEntityListener;
+import com.MyBooking.common.domain.PublicIdentifiable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "equipment")
-public class Equipment {
+@EntityListeners(PublicIdEntityListener.class)
+public class Equipment implements PublicIdentifiable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "public_id", columnDefinition = "uuid", nullable = false, unique = true, updatable = false)
+    private UUID publicId;
     
     @NotBlank(message = "Equipment name is required")
     @Size(max = 100, message = "Equipment name must not exceed 100 characters")
@@ -73,6 +80,12 @@ public class Equipment {
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    @Override
+    public UUID getPublicId() { return publicId; }
+
+    @Override
+    public void setPublicId(UUID publicId) { this.publicId = publicId; }
     
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

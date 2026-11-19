@@ -15,11 +15,18 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long> {
     
     // ==================== BASIC QUERIES ====================
+
+    Optional<LeaveRequest> findByPublicId(UUID publicId);
+
+    Optional<LeaveRequest> findByPublicIdAndEmployeeId(UUID publicId, Long employeeId);
+
+    boolean existsByPublicId(UUID publicId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT lr FROM LeaveRequest lr WHERE lr.id = :id")

@@ -14,11 +14,18 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface LoyaltyTransactionRepository extends JpaRepository<LoyaltyTransaction, Long> {
 
     // ==================== BASIC QUERIES ====================
+
+    @EntityGraph(attributePaths = {"account", "account.user"})
+    Optional<LoyaltyTransaction> findByPublicId(UUID publicId);
+
+    boolean existsByPublicId(UUID publicId);
 
     @Override
     @EntityGraph(attributePaths = {"account", "account.user"})

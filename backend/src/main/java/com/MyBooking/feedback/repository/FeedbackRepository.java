@@ -13,11 +13,20 @@ import com.MyBooking.auth.domain.User;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     
     // ==================== BASIC QUERIES ====================
+
+    @EntityGraph(attributePaths = {"user", "reservation"})
+    Optional<Feedback> findByPublicId(UUID publicId);
+
+    @EntityGraph(attributePaths = {"user", "reservation"})
+    Optional<Feedback> findByPublicIdAndUserId(UUID publicId, Long userId);
+
+    boolean existsByPublicId(UUID publicId);
 
     @Override
     @EntityGraph(attributePaths = {"user", "reservation"})

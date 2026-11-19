@@ -10,10 +10,15 @@ import org.springframework.stereotype.Repository;
 import com.MyBooking.employee.domain.Training;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface TrainingRepository extends JpaRepository<Training, Long> {
     // Basic queries
+    Optional<Training> findByPublicId(UUID publicId);
+
+    boolean existsByPublicId(UUID publicId);
     List<Training> findByTitle(String title);
     List<Training> findByTitleContaining(String keyword);
     

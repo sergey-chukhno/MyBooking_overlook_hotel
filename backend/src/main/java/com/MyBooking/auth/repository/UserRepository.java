@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository interface for User entity operations.
@@ -22,6 +23,16 @@ import java.util.Optional;
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    Optional<User> findByPublicId(UUID publicId);
+
+    boolean existsByPublicId(UUID publicId);
+
+    Optional<User> findByExternalIssuerAndExternalSubject(String externalIssuer, String externalSubject);
+
+    boolean existsByExternalIssuerAndExternalSubject(String externalIssuer, String externalSubject);
+
+    Optional<User> findByEmailIgnoreCase(String email);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT u FROM User u WHERE u.id = :id")

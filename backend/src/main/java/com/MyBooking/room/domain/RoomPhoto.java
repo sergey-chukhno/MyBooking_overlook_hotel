@@ -1,18 +1,25 @@
 package com.MyBooking.room.domain;
 
+import com.MyBooking.common.domain.PublicIdEntityListener;
+import com.MyBooking.common.domain.PublicIdentifiable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "room_photo")
-public class RoomPhoto {
+@EntityListeners(PublicIdEntityListener.class)
+public class RoomPhoto implements PublicIdentifiable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "public_id", columnDefinition = "uuid", nullable = false, unique = true, updatable = false)
+    private UUID publicId;
     
     @NotBlank(message = "Photo URL is required")
     @Size(max = 500, message = "Photo URL must not exceed 500 characters")
@@ -73,6 +80,12 @@ public class RoomPhoto {
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    @Override
+    public UUID getPublicId() { return publicId; }
+
+    @Override
+    public void setPublicId(UUID publicId) { this.publicId = publicId; }
     
     public String getPhotoUrl() { return photoUrl; }
     public void setPhotoUrl(String photoUrl) { this.photoUrl = photoUrl; }

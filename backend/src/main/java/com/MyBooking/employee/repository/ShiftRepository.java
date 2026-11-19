@@ -12,11 +12,18 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface ShiftRepository extends JpaRepository<Shift, Long> {
     
     // ==================== BASIC QUERIES ====================
+
+    Optional<Shift> findByPublicId(UUID publicId);
+
+    Optional<Shift> findByPublicIdAndEmployeeId(UUID publicId, Long employeeId);
+
+    boolean existsByPublicId(UUID publicId);
     
     Optional<Shift> findByEmployee(User employee);
     List<Shift> findByEmployeeId(Long employeeId);

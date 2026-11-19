@@ -1,18 +1,25 @@
 package com.MyBooking.auth.domain;
 
+import com.MyBooking.common.domain.PublicIdEntityListener;
+import com.MyBooking.common.domain.PublicIdentifiable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "app_user")
-public class User {
+@EntityListeners(PublicIdEntityListener.class)
+public class User implements PublicIdentifiable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "public_id", columnDefinition = "uuid", nullable = false, unique = true, updatable = false)
+    private UUID publicId;
 
     @NotBlank(message = "First name is required")
     @Size(max = 50, message = "First name must not exceed 50 characters")
@@ -30,10 +37,26 @@ public class User {
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters")
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     private String password;
+
+    @Size(max = 255, message = "External issuer must not exceed 255 characters")
+    @Column(name = "external_issuer", length = 255)
+    private String externalIssuer;
+
+    @Size(max = 128, message = "External subject must not exceed 128 characters")
+    @Column(name = "external_subject", length = 128)
+    private String externalSubject;
+
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
+
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled = true;
+
+    @Column(name = "auth_migrated_at")
+    private LocalDateTime authMigratedAt;
 
     @NotBlank(message = "Phone number is required")
     @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "Phone number should be valid")
@@ -80,6 +103,27 @@ public class User {
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    @Override
+    public UUID getPublicId() { return publicId; }
+
+    @Override
+    public void setPublicId(UUID publicId) { this.publicId = publicId; }
+
+    public String getExternalIssuer() { return externalIssuer; }
+    public void setExternalIssuer(String externalIssuer) { this.externalIssuer = externalIssuer; }
+
+    public String getExternalSubject() { return externalSubject; }
+    public void setExternalSubject(String externalSubject) { this.externalSubject = externalSubject; }
+
+    public boolean isEmailVerified() { return emailVerified; }
+    public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
+
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+
+    public LocalDateTime getAuthMigratedAt() { return authMigratedAt; }
+    public void setAuthMigratedAt(LocalDateTime authMigratedAt) { this.authMigratedAt = authMigratedAt; }
     
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }

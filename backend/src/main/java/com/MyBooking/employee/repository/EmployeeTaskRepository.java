@@ -13,11 +13,18 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface EmployeeTaskRepository extends JpaRepository<EmployeeTask, Long> {
 
     // ==================== BASIC QUERIES ====================
+
+    Optional<EmployeeTask> findByPublicId(UUID publicId);
+
+    Optional<EmployeeTask> findByPublicIdAndEmployeeId(UUID publicId, Long employeeId);
+
+    boolean existsByPublicId(UUID publicId);
     
     /**
      * Find all tasks for a specific employee
