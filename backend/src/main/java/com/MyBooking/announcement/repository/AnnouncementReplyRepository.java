@@ -13,11 +13,18 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface AnnouncementReplyRepository extends JpaRepository<AnnouncementReply, Long> {
 
     // ==================== BASIC QUERIES ====================
+
+    @EntityGraph(attributePaths = {"user"})
+    Optional<AnnouncementReply> findByPublicId(UUID publicId);
+
+    boolean existsByPublicId(UUID publicId);
 
     @Override
     @EntityGraph(attributePaths = {"user"})

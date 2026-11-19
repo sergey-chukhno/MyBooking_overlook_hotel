@@ -15,11 +15,16 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     // ==================== BASIC QUERIES ====================
+
+    Optional<Employee> findByPublicId(UUID publicId);
+
+    boolean existsByPublicId(UUID publicId);
     
     /**
      * Find employee by user ID

@@ -12,11 +12,16 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
 
     // ==================== BASIC QUERIES ====================
+
+    Optional<Equipment> findByPublicId(UUID publicId);
+
+    boolean existsByPublicId(UUID publicId);
 
     // Find by name (exact match)
     Optional<Equipment> findByName(String name);

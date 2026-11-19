@@ -1,6 +1,8 @@
 package com.MyBooking.announcement.domain;
 
 import com.MyBooking.auth.domain.User;
+import com.MyBooking.common.domain.PublicIdEntityListener;
+import com.MyBooking.common.domain.PublicIdentifiable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,14 +10,19 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "announcement_reply")
-public class AnnouncementReply {
+@EntityListeners(PublicIdEntityListener.class)
+public class AnnouncementReply implements PublicIdentifiable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "public_id", columnDefinition = "uuid", nullable = false, unique = true, updatable = false)
+    private UUID publicId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "announcement_id", nullable = false)
@@ -52,6 +59,12 @@ public class AnnouncementReply {
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    @Override
+    public UUID getPublicId() { return publicId; }
+
+    @Override
+    public void setPublicId(UUID publicId) { this.publicId = publicId; }
     
     public Announcement getAnnouncement() { return announcement; }
     public void setAnnouncement(Announcement announcement) { this.announcement = announcement; }

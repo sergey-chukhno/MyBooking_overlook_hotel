@@ -15,11 +15,16 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface InstallationRepository extends JpaRepository<Installation, Long> {
 
     // ==================== BASIC QUERIES ====================
+
+    Optional<Installation> findByPublicId(UUID publicId);
+
+    boolean existsByPublicId(UUID publicId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT i FROM Installation i WHERE i.id = :id")

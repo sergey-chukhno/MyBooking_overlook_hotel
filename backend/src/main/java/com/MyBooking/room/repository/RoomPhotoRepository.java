@@ -12,11 +12,18 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface RoomPhotoRepository extends JpaRepository<RoomPhoto, Long> {
 
     // ==================== BASIC QUERIES ====================
+
+    Optional<RoomPhoto> findByPublicId(UUID publicId);
+
+    Optional<RoomPhoto> findByPublicIdAndRoomId(UUID publicId, Long roomId);
+
+    boolean existsByPublicId(UUID publicId);
 
     // Find by room
     List<RoomPhoto> findByRoom(Room room);

@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository interface for Room entity operations.
@@ -24,6 +25,10 @@ import java.util.Optional;
  */
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
+
+    Optional<Room> findByPublicId(UUID publicId);
+
+    boolean existsByPublicId(UUID publicId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT r FROM Room r WHERE r.id = :id")

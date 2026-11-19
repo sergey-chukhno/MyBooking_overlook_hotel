@@ -146,5 +146,23 @@ class UserTest {
         assertEquals("456 Oak St", newUser.getAddress());
         assertEquals(LocalDate.of(1985, 5, 15), newUser.getBirthDate());
         assertEquals(Role.EMPLOYEE, newUser.getRole());
+        assertTrue(newUser.isEnabled());
+        assertFalse(newUser.isEmailVerified());
+    }
+
+    @Test
+    void testExternalIdentityAndNullablePasswordDefaults() {
+        // IDP-T03: Keycloak JIT-provisioned or migrated users have null password and paired (externalIssuer, externalSubject)
+        user.setPassword(null);
+        user.setExternalIssuer("http://127.0.0.1:8180/realms/mybooking");
+        user.setExternalSubject("00000000-0000-4000-a000-000000000003");
+        user.setEmailVerified(true);
+
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        assertTrue(violations.isEmpty(), "User with null password and external identity should pass bean validation");
+        assertEquals("http://127.0.0.1:8180/realms/mybooking", user.getExternalIssuer());
+        assertEquals("00000000-0000-4000-a000-000000000003", user.getExternalSubject());
+        assertTrue(user.isEmailVerified());
+        assertTrue(user.isEnabled());
     }
 }
