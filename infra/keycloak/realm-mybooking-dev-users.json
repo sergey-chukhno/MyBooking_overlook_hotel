@@ -1,0 +1,64 @@
+{
+  "users": [
+    {
+      "id": "00000000-0000-4000-a000-000000000001",
+      "username": "admin@example.com",
+      "email": "admin@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${KC_DEV_SEED_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-mybooking",
+        "ROLE_ADMIN"
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-a000-000000000002",
+      "username": "employee@example.com",
+      "email": "employee@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Employee",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${KC_DEV_SEED_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-mybooking",
+        "ROLE_EMPLOYEE"
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-a000-000000000003",
+      "username": "client.test@mybooking.local",
+      "email": "client.test@mybooking.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Client",
+      "lastName": "Test",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${KC_DEV_SEED_PASSWORD}",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-mybooking",
+        "ROLE_CLIENT"
+      ]
+    }
+  ]
+}

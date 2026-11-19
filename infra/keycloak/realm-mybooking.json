@@ -1,0 +1,186 @@
+{
+  "id": "mybooking-realm",
+  "realm": "mybooking",
+  "displayName": "MyBooking Overlook Hotel Identity Provider",
+  "enabled": true,
+  "sslRequired": "${KC_SSL_REQUIRED}",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": false,
+  "rememberMe": false,
+  "verifyEmail": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxTemporaryLockouts": 0,
+  "failureFactor": 5,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "minimumQuickLoginWaitSeconds": 60,
+  "maxFailureWaitSeconds": 900,
+  "maxDeltaTimeSeconds": 43200,
+  "passwordPolicy": "hashAlgorithm(pbkdf2-sha512) and hashIterations(210000) and length(12) and upperCase(1) and lowerCase(1) and digits(1) and specialChars(1) and notUsername and notEmail",
+  "defaultSignatureAlgorithm": "RS256",
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0,
+  "accessTokenLifespan": 300,
+  "accessTokenLifespanForImplicitFlow": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 28800,
+  "offlineSessionIdleTimeout": 2592000,
+  "offlineSessionMaxLifespanEnabled": true,
+  "offlineSessionMaxLifespan": 5184000,
+  "accessCodeLifespan": 60,
+  "accessCodeLifespanUserAction": 300,
+  "accessCodeLifespanLogin": 1800,
+  "actionTokenGeneratedByAdminLifespan": 43200,
+  "actionTokenGeneratedByUserLifespan": 300,
+  "defaultRole": {
+    "id": "role-default-mybooking",
+    "name": "default-roles-mybooking",
+    "description": "${role_default-roles}",
+    "composite": true,
+    "clientRole": false,
+    "containerId": "mybooking-realm"
+  },
+  "roles": {
+    "realm": [
+      {
+        "id": "role-default-mybooking",
+        "name": "default-roles-mybooking",
+        "description": "${role_default-roles}",
+        "composite": true,
+        "composites": {
+          "realm": [
+            "ROLE_CLIENT"
+          ]
+        },
+        "clientRole": false,
+        "containerId": "mybooking-realm"
+      },
+      {
+        "id": "role-client",
+        "name": "ROLE_CLIENT",
+        "description": "Authenticated hotel guest / client role (assigned by default on self-registration)",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "mybooking-realm"
+      },
+      {
+        "id": "role-employee",
+        "name": "ROLE_EMPLOYEE",
+        "description": "Hotel operational staff role (fine-grained department and ACTIVE status enforced by PostgreSQL)",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "mybooking-realm"
+      },
+      {
+        "id": "role-admin",
+        "name": "ROLE_ADMIN",
+        "description": "Hotel platform administrator role",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "mybooking-realm"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "id": "client-mybooking-bff",
+      "clientId": "mybooking-bff",
+      "name": "MyBooking Next.js BFF Confidential Client",
+      "description": "Confidential OAuth2 / OIDC BFF client enforcing Authorization Code + mandatory PKCE S256",
+      "enabled": true,
+      "alwaysDisplayInConsole": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${KC_CLIENT_SECRET_BFF}",
+      "redirectUris": [
+        "${KC_BFF_REDIRECT_URI}"
+      ],
+      "webOrigins": [
+        "${KC_BFF_WEB_ORIGIN}"
+      ],
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "${KC_BFF_POST_LOGOUT_REDIRECT_URI}",
+        "backchannel.logout.url": "${KC_BFF_BACKCHANNEL_LOGOUT_URL}",
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "access.token.signed.response.alg": "RS256",
+        "id.token.signed.response.alg": "RS256",
+        "use.refresh.tokens": "true",
+        "client_credentials.use_refresh_token": "false"
+      },
+      "protocolMappers": [
+        {
+          "id": "mapper-mybooking-api-audience",
+          "name": "mybooking-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "mybooking-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "lightweight.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        },
+        {
+          "id": "mapper-realm-roles",
+          "name": "realm-roles-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    },
+    {
+      "id": "client-mybooking-service-worker",
+      "clientId": "mybooking-service-worker",
+      "name": "MyBooking Background Service Worker (Deferred to Phase 5/6)",
+      "description": "Reserved confidential client_credentials profile; disabled in Milestone IdP",
+      "enabled": false,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect"
+    },
+    {
+      "id": "client-mybooking-mobile",
+      "clientId": "mybooking-mobile",
+      "name": "MyBooking Native Mobile Client (Reserved Future Phase)",
+      "description": "Reserved public client convention; disabled in Milestone IdP",
+      "enabled": false,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    }
+  ]
+}

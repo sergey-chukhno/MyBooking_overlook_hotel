@@ -27,6 +27,7 @@ jobs:
     outputs:
       backend: ${{ steps.classify.outputs.backend }}
       db_infra: ${{ steps.classify.outputs.db_infra }}
+      infra_config: ${{ steps.classify.outputs.infra_config }}
       frontend: ${{ steps.classify.outputs.frontend }}
     steps:
       - name: Checkout repository
@@ -55,6 +56,7 @@ jobs:
 
           BACKEND="false"
           DB_INFRA="false"
+          INFRA_CONFIG="false"
           FRONTEND="false"
 
           if echo "$CHANGED_FILES" | grep -Eq '^(backend/|pom\.xml|mvnw|\.mvn/|\.github/workflows/ci-pr\.yml)'; then
@@ -63,21 +65,26 @@ jobs:
           if echo "$CHANGED_FILES" | grep -Eq '^(backend/|pom\.xml|mvnw|\.mvn/|infra/|docker-compose|\.github/workflows/ci-pr\.yml)'; then
             DB_INFRA="true"
           fi
+          if echo "$CHANGED_FILES" | grep -Eq '^(infra/|docker-compose|\.env\.example|scripts/ci/lint-infra-policy\.sh|(.*/)?Dockerfile|\.github/workflows/ci-pr\.yml)'; then
+            INFRA_CONFIG="true"
+          fi
           if echo "$CHANGED_FILES" | grep -Eq '^(frontend/|\.github/workflows/ci-pr\.yml)'; then
             FRONTEND="true"
           fi
 
-          # On merge_group, always enforce backend, db_infra, and frontend if diff is empty
+          # On merge_group, always enforce backend, db_infra, infra_config, and frontend if diff is empty
           if [ -z "$CHANGED_FILES" ] && [ "${{ github.event_name }}" = "merge_group" ]; then
             BACKEND="true"
             DB_INFRA="true"
+            INFRA_CONFIG="true"
             FRONTEND="true"
           fi
 
           echo "backend=$BACKEND" >> "$GITHUB_OUTPUT"
           echo "db_infra=$DB_INFRA" >> "$GITHUB_OUTPUT"
+          echo "infra_config=$INFRA_CONFIG" >> "$GITHUB_OUTPUT"
           echo "frontend=$FRONTEND" >> "$GITHUB_OUTPUT"
-          echo "Scope classification -> backend=$BACKEND, db_infra=$DB_INFRA, frontend=$FRONTEND"
+          echo "Scope classification -> backend=$BACKEND, db_infra=$DB_INFRA, infra_config=$INFRA_CONFIG, frontend=$FRONTEND"
 
   # ---------------------------------------------------------------------------
   # 2. Secret Scanning Gate — Gitleaks (CICD-005)
@@ -240,7 +247,39 @@ jobs:
         run: npm --prefix frontend run build
 
   # ---------------------------------------------------------------------------
-  # 6. Single Stable Required Status Check (CICD-004)
+  # 6. Static Container/Compose, 5-Network Isolation & Keycloak Realm Lint (CICD-010)
+  # Runs whenever infra/**, docker-compose.yml, .env.example, Dockerfiles, or
+  # ci-pr.yml change. Enforces 5-network isolation, Redis persistence disablement
+  # (--save "" --appendonly no), and Keycloak mybooking realm security invariants.
+  # ---------------------------------------------------------------------------
+  container-config-lint:
+    name: Container, Compose & Realm Policy Lint
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: needs.changes.outputs.infra_config == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Run Compose, 5-Network, Redis & Keycloak Realm Policy Linter (+ Negative Self-Tests)
+        run: ./scripts/ci/lint-infra-policy.sh --run-self-tests
+
+      - name: Run Hadolint on any Dockerfiles (if present)
+        run: |
+          set -euo pipefail
+          DOCKERFILES="$(find . -maxdepth 3 -name 'Dockerfile*' -not -path './node_modules/*' -not -path './frontend/node_modules/*' || true)"
+          if [ -n "$DOCKERFILES" ]; then
+            echo "Linting Dockerfiles with Hadolint:"
+            echo "$DOCKERFILES"
+            for df in $DOCKERFILES; do
+              docker run --rm -i ghcr.io/hadolint/hadolint:v2.12.0 < "$df"
+            done
+          else
+            echo "No Dockerfiles present in repository yet; skipping Hadolint step."
+          fi
+
+  # ---------------------------------------------------------------------------
+  # 7. Single Stable Required Status Check (CICD-004 / CICD-010)
   # Always runs; passes ONLY if every applicable job succeeded and non-applicable
   # jobs were legitimately skipped.
   # ---------------------------------------------------------------------------
@@ -254,6 +293,7 @@ jobs:
       - backend-fast
       - backend-pg-migration
       - frontend-fast
+      - container-config-lint
     steps:
       - name: Evaluate Stage A required gates (fail-closed)
         run: |
@@ -265,15 +305,18 @@ jobs:
           BACKEND_RES="${{ needs.backend-fast.result }}"
           DB_SCOPE="${{ needs.changes.outputs.db_infra }}"
           DB_RES="${{ needs.backend-pg-migration.result }}"
+          INFRA_SCOPE="${{ needs.changes.outputs.infra_config }}"
+          INFRA_RES="${{ needs.container-config-lint.result }}"
           FRONTEND_SCOPE="${{ needs.changes.outputs.frontend }}"
           FRONTEND_RES="${{ needs.frontend-fast.result }}"
 
           echo "Gate evaluation inputs:"
-          echo "  changes              : result=${CHANGES_RES}"
-          echo "  secret-scan          : result=${SECRET_RES} (always required)"
-          echo "  backend-fast         : scope=${BACKEND_SCOPE}, result=${BACKEND_RES}"
-          echo "  backend-pg-migration : scope=${DB_SCOPE}, result=${DB_RES}"
-          echo "  frontend-fast        : scope=${FRONTEND_SCOPE}, result=${FRONTEND_RES}"
+          echo "  changes               : result=${CHANGES_RES}"
+          echo "  secret-scan           : result=${SECRET_RES} (always required)"
+          echo "  backend-fast          : scope=${BACKEND_SCOPE}, result=${BACKEND_RES}"
+          echo "  backend-pg-migration  : scope=${DB_SCOPE}, result=${DB_RES}"
+          echo "  container-config-lint : scope=${INFRA_SCOPE}, result=${INFRA_RES}"
+          echo "  frontend-fast         : scope=${FRONTEND_SCOPE}, result=${FRONTEND_RES}"
 
           if [ "$CHANGES_RES" != "success" ]; then
             echo "FAIL: Path classifier job did not succeed (${CHANGES_RES})."
@@ -304,6 +347,7 @@ jobs:
 
           check_scoped_job "backend-fast" "$BACKEND_SCOPE" "$BACKEND_RES"
           check_scoped_job "backend-pg-migration" "$DB_SCOPE" "$DB_RES"
+          check_scoped_job "container-config-lint" "$INFRA_SCOPE" "$INFRA_RES"
           check_scoped_job "frontend-fast" "$FRONTEND_SCOPE" "$FRONTEND_RES"
 
           echo "PASS: All applicable Stage A gates succeeded and non-applicable gates were legitimately skipped."

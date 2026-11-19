@@ -44,9 +44,9 @@ services:
     image: quay.io/keycloak/keycloak:26.4.0
     container_name: mybooking-keycloak
     restart: unless-stopped
+    entrypoint: ["/bin/bash", "/opt/keycloak/realm-templates/kc-init-and-start.sh"]
     command:
       - start-dev
-      - --import-realm
       - --health-enabled=true
       - --metrics-enabled=true
     environment:
@@ -59,6 +59,16 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
+      KC_SSL_REQUIRED: ${KC_SSL_REQUIRED:-external}
+      KC_CLIENT_SECRET_BFF: ${KC_CLIENT_SECRET_BFF:-dev_only_bff_client_secret_change_me}
+      KC_BFF_REDIRECT_URI: ${KC_BFF_REDIRECT_URI:-http://localhost:3000/api/auth/callback}
+      KC_BFF_WEB_ORIGIN: ${KC_BFF_WEB_ORIGIN:-http://localhost:3000}
+      KC_BFF_POST_LOGOUT_REDIRECT_URI: ${KC_BFF_POST_LOGOUT_REDIRECT_URI:-http://localhost:3000/*}
+      KC_BFF_BACKCHANNEL_LOGOUT_URL: ${KC_BFF_BACKCHANNEL_LOGOUT_URL:-http://host.docker.internal:3000/api/auth/backchannel-logout}
+      KC_IMPORT_DEV_USERS: ${KC_IMPORT_DEV_USERS:-true}
+      KC_DEV_SEED_PASSWORD: ${KC_DEV_SEED_PASSWORD:-Pass123@Perform!}
+    volumes:
+      - ./infra/keycloak:/opt/keycloak/realm-templates:ro
     ports:
       - "127.0.0.1:${KC_HOST_PORT:-8180}:8080"
     depends_on:
